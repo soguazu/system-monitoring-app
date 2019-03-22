@@ -4,6 +4,8 @@
 
 var http = require("http");
 var url = require("url");
+
+var config = require('./config');
 var StringDecoder = require("string_decoder").StringDecoder;
 
 // The server should respond to all requests with a string
@@ -56,6 +58,8 @@ var server = http.createServer(function(req, res) {
 
       //use payload called back or default
       payload = typeof payload === "object" ? data : {};
+      res.setHeader('Content-Type', 'application/json');
+
       res.writeHead(statusCode);
 
       res.end(JSON.stringify(payload));
@@ -68,8 +72,8 @@ var server = http.createServer(function(req, res) {
   });
 });
 
-server.listen(3000, function() {
-  console.log("The server is listening on port 3000 now");
+server.listen(config.port, function() {
+  console.log(`The server is listening on port ${config.port} in ${config.envName} environment`);
 });
 
 //Defining request controllers
