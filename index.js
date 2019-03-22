@@ -6,21 +6,16 @@ var http = require("http");
 var https = require("https");
 var url = require("url");
 var StringDecoder = require("string_decoder").StringDecoder;
-var fs = require('fs');
-
+var fs = require("fs");
 
 var config = require("./config");
-var _data = require('./lib/data');
-
-
+var _data = require("./lib/data");
+var handlers = require('./lib/handlers');
 
 //TESTING
 
 // @TODO delete this
-_data.read('test', 08066698729, function(content) {
-    console.log(content)
-})
-
+//  
 // The server should respond to all requests with a string
 
 //Instatiating the HTTP server
@@ -36,12 +31,12 @@ httpServer.listen(config.httpPort, function() {
 //Instatiating the HTTPS server
 
 var httpsServerOptions = {
-    'key': fs.readFileSync('./https/key.pem'),
-    'cert': fs.readFileSync('./https/cert.pem')
-}
+  key: fs.readFileSync("./https/key.pem"),
+  cert: fs.readFileSync("./https/cert.pem")
+};
 
 var httpsServer = https.createServer(httpsServerOptions, function(req, res) {
-    unifiedServer(req, res);
+  unifiedServer(req, res);
 });
 
 httpsServer.listen(config.httpsPort, function() {
@@ -105,23 +100,10 @@ var unifiedServer = function(req, res) {
 };
 
 //Defining request controllers
-var handlers = {};
 
-handlers.ping = function(data, callback) {
-    callback(200, data);
-}
-
-handlers.sample = function(data, callback) {
-  //Callback a http status code and a payload
-  callback(406, { sample: "handler" });
-};
-
-handlers.notFound = function(data, callback) {
-  callback(404);
-};
 
 //Defining request routers
 var routers = {
-  'sample': handlers.sample,
-  'ping': handlers.ping
+  sample: handlers.sample,
+  ping: handlers.ping
 };
