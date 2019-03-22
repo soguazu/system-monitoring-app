@@ -3,16 +3,52 @@
  */
 
 var http = require("http");
+var https = require("https");
 var url = require("url");
-
-var config = require('./config');
 var StringDecoder = require("string_decoder").StringDecoder;
+var fs = require('fs');
+
+
+var config = require("./config");
+var _data = require('./lib/data');
+
+
+
+//TESTING
+
+// @TODO delete this
+_data.read('test', 08066698729, function(content) {
+    console.log(content)
+})
 
 // The server should respond to all requests with a string
 
-//Start the server and have it listen on port 3000
+//Instatiating the HTTP server
 
-var server = http.createServer(function(req, res) {
+var httpServer = http.createServer(function(req, res) {
+  unifiedServer(req, res);
+});
+
+httpServer.listen(config.httpPort, function() {
+  console.log(`The server is listening on port ${config.httpPort}`);
+});
+
+//Instatiating the HTTPS server
+
+var httpsServerOptions = {
+    'key': fs.readFileSync('./https/key.pem'),
+    'cert': fs.readFileSync('./https/cert.pem')
+}
+
+var httpsServer = https.createServer(httpsServerOptions, function(req, res) {
+    unifiedServer(req, res);
+});
+
+httpsServer.listen(config.httpsPort, function() {
+  console.log(`The server is listening on port ${config.httpsPort}`);
+});
+
+var unifiedServer = function(req, res) {
   //Get the URL and parse it
   var parsedUrl = url.parse(req.url, true);
 
@@ -58,26 +94,22 @@ var server = http.createServer(function(req, res) {
 
       //use payload called back or default
       payload = typeof payload === "object" ? data : {};
-      res.setHeader('Content-Type', 'application/json');
+      res.setHeader("Content-Type", "application/json");
 
       res.writeHead(statusCode);
 
       res.end(JSON.stringify(payload));
+      //   console.log(payload);
     });
-
-    //Log the request path
-    // console.log('Request received on path: ' + trimmedPath + ' with this method: ' + method + 'and  with this query paramters: ', queryParams, ' with this headers: ', headers);
-
-    // console.log('Request was received with payload: ', buffer);
   });
-});
-
-server.listen(config.port, function() {
-  console.log(`The server is listening on port ${config.port} in ${config.envName} environment`);
-});
+};
 
 //Defining request controllers
 var handlers = {};
+
+handlers.ping = function(data, callback) {
+    callback(200, data);
+}
 
 handlers.sample = function(data, callback) {
   //Callback a http status code and a payload
@@ -90,5 +122,6 @@ handlers.notFound = function(data, callback) {
 
 //Defining request routers
 var routers = {
-  sample: handlers.sample
+  'sample': handlers.sample,
+  'ping': handlers.ping
 };
