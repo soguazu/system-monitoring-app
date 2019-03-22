@@ -8,13 +8,14 @@ var url = require("url");
 var StringDecoder = require("string_decoder").StringDecoder;
 var fs = require("fs");
 
-var config = require("./config");
+var config = require("./lib/config");
 var _data = require("./lib/data");
 var handlers = require('./lib/handlers');
+var helpers = require('./lib/helpers.js');
 
 //TESTING
 
-// @TODO delete this
+// @TODO: delete this
 //  
 // The server should respond to all requests with a string
 
@@ -81,20 +82,23 @@ var unifiedServer = function(req, res) {
       queryParams: queryParams,
       method: method,
       headers: headers,
-      payload: buffer
+      payload: helpers.parseJsonToObject(buffer)
     };
     chosenHandler(data, function(statusCode, payload) {
       //use the status code called back or default
       statusCode = typeof statusCode === "number" ? statusCode : 200;
 
       //use payload called back or default
-      payload = typeof payload === "object" ? data : {};
+      payload = typeof payload === "object" ? payload : {};
+
+      // Convert the payload to a string
+      var payloadString = JSON.stringify(payload);
       res.setHeader("Content-Type", "application/json");
 
       res.writeHead(statusCode);
 
-      res.end(JSON.stringify(payload));
-      //   console.log(payload);
+      res.end(payloadString);
+        // console.log(data.payload);
     });
   });
 };
@@ -104,6 +108,8 @@ var unifiedServer = function(req, res) {
 
 //Defining request routers
 var routers = {
-  sample: handlers.sample,
-  ping: handlers.ping
+  'sample': handlers.sample,
+  'ping': handlers.ping,
+  'users': handlers.users,
+  'tokens': handlers.tokens
 };
