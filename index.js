@@ -98,7 +98,7 @@ var unifiedServer = function(req, res) {
       res.writeHead(statusCode);
 
       res.end(payloadString);
-        // console.log(data.payload);
+        // console.log(data.headers.token);
     });
   });
 };
