@@ -20,5 +20,8 @@
   "homepage": "https://github.com/soguazu/system-monitoring-app#readme",
   "devDependencies": {
     "nodemon": "^1.18.10"
+  },
+  "dependencies": {
+    "twilio": "^3.29.2"
   }
 }
